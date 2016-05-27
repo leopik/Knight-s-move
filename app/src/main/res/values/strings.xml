@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">Knights Move</string>
+
+    <string name="ButtonPlayPVPtext">2 Players</string>
+    <string name="title_activity_one_vsone">OneVSOne</string>
+    <string name="title_activity_rules">Rules</string>
+    <string name="fieldsizetext">Enter field size</string>
+    <string name="ButtonPlayPVEtext">1 Player</string>
+    <string name="ButtonRulestext">Rules</string>
+
+    <string name="RulesText">
+        Игроки поочередно переставляют на шахматной доске коня. Ходить конем можно на два поля вниз и потом на одно поле вправо или влево или на два поля влево и потом на одно поле вверх или вниз. Выигрывает тот, кто поставит своим очередным ходом коня в положение, при котором противнику некуда ходить.
+    </string>
+</resources>
