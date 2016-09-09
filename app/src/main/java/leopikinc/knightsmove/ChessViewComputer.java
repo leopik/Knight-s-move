@@ -1,30 +1,27 @@
 package leopikinc.knightsmove;
 
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.util.Log;
 import android.view.MotionEvent;
-import android.view.View;
-import android.widget.Toast;
 
 /**
- * Created by Leopik on 15.05.2016.
+ * View class for PvE instance
  */
 public class ChessViewComputer extends ChessView {
+
     protected static String TAG = "ChessViewComputer class";
     protected Core.objectColour player;
-    protected Core.piece playerpiece;
-    protected Core.piece computerpiece;
+    protected Core.Piece playerpiece;
+    protected Core.Piece computerpiece;
 
     public void setMoveOrder(Core.objectColour color) {
         player = color;
         if (color == Core.objectColour.black) {
-            playerpiece = core.getBlackpiece();
-            computerpiece = core.getWhitepiece();
+            playerpiece = core.getBlackPiece();
+            computerpiece = core.getWhitePiece();
         } else {
-            playerpiece = core.getWhitepiece();
-            computerpiece = core.getBlackpiece();
+            playerpiece = core.getWhitePiece();
+            computerpiece = core.getBlackPiece();
         }
 
 
@@ -93,9 +90,9 @@ public class ChessViewComputer extends ChessView {
                 }
 
                 // if it's not under attack and has big distance
-                if (!isunderattack && ((computerpiece.getAvailableMoves().get(i).getX() + Math.abs(computerpiece.getAvailableMoves().get(i).getY() - core.getFieldSize() +1)) > xmax + ymax)){
-                    xmax = computerpiece.getAvailableMoves().get(i).getX();
-                    ymax = Math.abs(computerpiece.getAvailableMoves().get(i).getY() - core.getFieldSize() +1);
+                if (!isunderattack && ((computerpiece.getAvailableMoves().get(i).getXCord() + Math.abs(computerpiece.getAvailableMoves().get(i).getYCord() - core.getFieldSize() +1)) > xmax + ymax)){
+                    xmax = computerpiece.getAvailableMoves().get(i).getXCord();
+                    ymax = Math.abs(computerpiece.getAvailableMoves().get(i).getYCord() - core.getFieldSize() +1);
                 }
             }
 

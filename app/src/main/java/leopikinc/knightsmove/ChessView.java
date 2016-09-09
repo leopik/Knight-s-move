@@ -11,11 +11,12 @@ import android.widget.Toast;
 
 import leopikinc.knightsmove.Core.*;
 
-
-
+/**
+ * View class for PvP instance
+ */
 public class ChessView extends View{
 
-    protected piece black, white, current; // is not current is previous player's
+    protected Piece black, white, current; // is not current is previous player's
     protected boolean isSelected, isOver;
     protected Core core;
     protected Canvas canvas;
@@ -43,20 +44,20 @@ public class ChessView extends View{
         }
     }
 
-    protected void drawAvailableMoves(cell[][] board, int x, int y){
+    protected void drawAvailableMoves(Cell[][] board, int x, int y){
 
-        piece piece = board[x][y].getPiece();
+        Piece piece = board[x][y].getPiece();
         Paint lightgrey = new Paint();
         lightgrey.setColor(Color.GRAY);
         lightgrey.setAlpha(128);
         for (int i = 0; i < piece.getAvailableMoves().size(); i++) {
-            cell cell = piece.getAvailableMoves().get(i);
-            canvas.drawCircle(cell.getX()*sizeofblock+sizeofblock/2, dy+cell.getY()*sizeofblock+sizeofblock/2, 0.5f*sizeofblock/2, lightgrey);
+            Cell cell = piece.getAvailableMoves().get(i);
+            canvas.drawCircle(cell.getXCord()*sizeofblock+sizeofblock/2, dy+cell.getYCord()*sizeofblock+sizeofblock/2, 0.5f*sizeofblock/2, lightgrey);
         }
 
     }
 
-    protected void drawBoard(cell[][] board){
+    protected void drawBoard(Cell[][] board){
 
         Log.d(TAG, "drawBoard called");
 
@@ -157,7 +158,7 @@ public class ChessView extends View{
     public ChessView(Context context, Core core){
         super(context);
         this.core = core;
-        current = core.getWhitepiece();
+        current = core.getWhitePiece();
         isOver = false;
         isSelected = false;
 

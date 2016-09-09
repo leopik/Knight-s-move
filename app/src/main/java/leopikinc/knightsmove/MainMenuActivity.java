@@ -2,80 +2,73 @@ package leopikinc.knightsmove;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
-
+/** Main menu */
 public class MainMenuActivity extends Activity implements View.OnClickListener {
+
+    private static final String TAG = "MainMenuActivity class"; // Used for logging
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_menu);
 
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        Button buttonPlayPVP = (Button) findViewById(R.id.ButtonPlayPVPid);
+        Button buttonPlayPVE = (Button) findViewById(R.id.ButtonPlayPVEid);
+        Button buttonRules = (Button) findViewById(R.id.ButtonRulesid);
 
-        Button ButtonPlayPVP = (Button) findViewById(R.id.ButtonPlayPVPid);
-        ButtonPlayPVP.setOnClickListener(this);
-        Button ButtonPlayPVE = (Button) findViewById(R.id.ButtonPlayPVEid);
-        ButtonPlayPVE.setOnClickListener(this);
-        Button ButtonRules = (Button) findViewById(R.id.ButtonRulesid);
-        ButtonRules.setOnClickListener(this);
+        buttonPlayPVP.setOnClickListener(this);
+        buttonPlayPVE.setOnClickListener(this);
+        buttonRules.setOnClickListener(this);
     }
 
     @Override
-    public void onClick(View v) {
-        Intent i;
-        EditText fieldsizetext = (EditText) findViewById(R.id.getfieldsizetext);
-        int fieldsize;
-        switch (v.getId()){
+    public void onClick(View view) {
+
+        Intent intent;
+        EditText fieldSizeText = (EditText) findViewById(R.id.getfieldsizetext);
+        int fieldSize;
+
+        switch (view.getId()) {
             case R.id.ButtonRulesid:
-                i = new Intent(this, RulesActivity.class);
-                startActivity(i);
+                intent = new Intent(this, RulesActivity.class);
+                startActivity(intent);
                 break;
 
             case R.id.ButtonPlayPVPid:
                 try {
-                    fieldsize = Integer.parseInt(fieldsizetext.getText().toString());
-                }catch (Exception ex){
-                    fieldsize = 8;
+                    fieldSize = Integer.parseInt(fieldSizeText.getText().toString());
+                } catch (NumberFormatException exception){
+                    fieldSize = 8;
                 }
-                if (fieldsize<2)
-                    fieldsize = 8;
+                if (fieldSize<2)
+                    fieldSize = 8; // minimum field size is 2
 
-                i = new Intent(this,OneVSOne.class);
-                i.putExtra("fieldsize", fieldsize);
-                startActivity(i);
+                intent = new Intent(this,OneVSOne.class);
+                intent.putExtra("fieldSize", fieldSize);
+                startActivity(intent);
                 break;
 
             case R.id.ButtonPlayPVEid:
                 try {
-                    fieldsize = Integer.parseInt(fieldsizetext.getText().toString());
+                    fieldSize = Integer.parseInt(fieldSizeText.getText().toString());
                 }catch (Exception ex){
-                    fieldsize = 8;
+                    fieldSize = 8;
                 }
-                if (fieldsize<2)
-                    fieldsize = 8;
+                if (fieldSize<2)
+                    fieldSize = 8;
 
-                i = new Intent(this,PlayerVSComputer.class);
-                i.putExtra("fieldsize", fieldsize);
-                startActivity(i);
+                intent = new Intent(this,PlayerVSComputer.class);
+                intent.putExtra("fieldSize", fieldSize);
+                startActivity(intent);
                 break;
-
         }
     }
     //TODO: add images
-    //TODO: PvE
     //TODO: highlight chosen figure?
-    //TODO: normally comment
 }

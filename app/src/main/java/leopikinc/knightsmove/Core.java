@@ -5,67 +5,65 @@ import android.util.Log;
 import java.util.ArrayList;
 import java.util.Random;
 
-
+/** Class containing board logic */
 public class Core {
 
-    private piece blackpiece,whitepiece;
+    private Piece blackPiece, whitePiece;
+    private static final String TAG = "Core class"; // for logging
 
-    public piece getBlackpiece(){
-        return blackpiece;
+    public Piece getBlackPiece(){
+        return blackPiece;
     }
-
-    public piece getWhitepiece() {
-        return whitepiece;
+    public Piece getWhitePiece() {
+        return whitePiece;
     }
-
-    private static String TAG = "Core class";
 
     public enum objectColour {
         black, white
     }
+    /** Every cell on chessboard is implmented with this class */
+    public class Cell {
 
-    public class cell {
-        private int x;
+        private int xCord, yCord;
+        private Piece piece;
 
-        public int getX() { return x; }
-
-        private int y;
-
-        public int getY() { return y; }
-
-        private piece piece;
-
-        public piece getPiece() {
+        public int getXCord() {
+            return xCord;
+        }
+        public int getYCord() {
+            return yCord;
+        }
+        public Piece getPiece() {
             return piece;
         }
 
-        public void setPiece(piece piece) {
+        public void setPiece(Piece piece) {
             this.piece = piece;
         }
 
-        cell(int x, int y) {
-            this.x = x;
-            this.y = y;
+        Cell(int xCord, int yCord) {
+            this.xCord = xCord;
+            this.yCord = yCord;
             this.piece = null;
         }
     }
 
+    /**
+     * Chess figure class
+     */
+    public class Piece {
 
-    public class piece {
-
-        private cell location;
-
-        public cell getLocation() { return location; }
-
+        private Cell location;
         private objectColour colour;
+        private ArrayList<Cell> availableMoves = new ArrayList<>();
 
+        public Cell getLocation() {
+            return location;
+        }
         public objectColour getPieceColour() {
             return colour;
         }
-
-        private ArrayList<cell> availableMoves = new ArrayList<>();
-
-        public ArrayList<cell> getAvailableMoves(){
+        public ArrayList<Cell> getAvailableMoves(){
             return availableMoves;
         }
 
@@ -73,45 +71,50 @@ public class Core {
 
             availableMoves.clear();
 
-            int xLoc = location.getX();
-            int yLoc = location.getY();
+            int xLoc = location.getXCord();
+            int yLoc = location.getYCord();
 
             if ((xLoc-2 >= 0) && (yLoc-1 >= 0))
-                availableMoves.add(board[xLoc-2][yLoc-1]);
+                availableMoves.add(board[xLoc-2][yLoc-1]); // Left + Down move
 
             if ((xLoc-2 >= 0) && (yLoc+1 < fieldsize))
-                availableMoves.add(board[xLoc-2][yLoc+1]);
+                availableMoves.add(board[xLoc-2][yLoc+1]); // Left + Up move
 
             if ((xLoc-1 >= 0) && (yLoc+2 < fieldsize))
-                availableMoves.add(board[xLoc-1][yLoc+2]);
+                availableMoves.add(board[xLoc-1][yLoc+2]); // Down + Left move
 
             if ((yLoc+2 < fieldsize) && (xLoc+1 < fieldsize))
-                availableMoves.add(board[xLoc+1][yLoc+2]);
-
+                availableMoves.add(board[xLoc+1][yLoc+2]); // Down + Right move
         }
 
-        // 0 means one knight ate another
-        // 1 means successful move
-        // 2 means unsuccessful move
-        public byte move(cell targetmove){
-            if ( availableMoves.contains(targetmove)){
-                if ((targetmove.getPiece()!=null) && (targetmove.getPiece()!=this)) {
-                    targetmove.setPiece(this);
+        /**
+         * 0 means one knight ate another
+         * 1 means successful move
+         * 2 means unsuccessful move
+         */
+        public byte move(Cell targetMove){
+
+            if (availableMoves.contains(targetMove)) {
+
+                // if smth exists on cell and it's not player's figure
+                if ((targetMove.getPiece() != null) && (targetMove.getPiece() != this)) {
+                    targetMove.setPiece(this); // move figure to another cell
                     this.location.setPiece(null);
-                    this.location = targetmove;
+                    this.location = targetMove;
                     return 0;
                 }
-                targetmove.setPiece(this);
+
+                targetMove.setPiece(this); // move figure to another cell
                 this.location.setPiece(null);
-                this.location = targetmove;
-                findAvailMoves();
+                this.location = targetMove;
+                findAvailMoves(); // find new available moves
                 return 1;
             }
             return 2;
         }
 
-        // CREATOR
-        piece(objectColour colour, cell location) {
+        Piece(objectColour colour, Cell location) {
+
             this.colour = colour;
             this.location = location;
             findAvailMoves();
@@ -119,40 +122,37 @@ public class Core {
 
     }
 
-
-    private cell board[][];
-//    private player white, black;
+    private Cell[][] board;
     private objectColour turn;
     private int fieldsize;
 
-    public cell[][] getBoard() {
+    public Cell[][] getBoard() {
         return board;
     }
-
     public objectColour getTurn() {
         return turn;
     }
+    public int getFieldSize() {
+        return fieldsize;
+    }
 
     public void changeTurn(){
+
         if (getTurn() == objectColour.black)
             turn = objectColour.white;
         else
             turn = objectColour.black;
     }
 
-    public int getFieldSize() { return fieldsize; }
-
-
-    void populateBoard(cell[][] board,int fieldsize) {
-
-
+    void populateBoard(Cell[][] board, int fieldsize) {
 
         // init the cells
         for (int x = 0; x < fieldsize; x++) {
             for (int y = 0; y < fieldsize; y++) {
-                board[x][y] = new cell(x, y);
+                board[x][y] = new Cell(x, y);
             }
         }
+
         // init random positions
         Random random = new Random();
         int pos1x = random.nextInt(fieldsize-2)+2;
@@ -168,22 +168,17 @@ public class Core {
             pos2y=random.nextInt(fieldsize);
         }
 
-        whitepiece = new piece(objectColour.white,board[pos1x][pos1y]);
-        blackpiece = new piece(objectColour.black,board[pos2x][pos2y]);
-        board[pos1x][pos1y].setPiece(whitepiece);
-        board[pos2x][pos2y].setPiece(blackpiece);
-
-        Log.d(TAG, "Positions of players are set");
-
-//        white = new player(objectColour.white, whitepiece);
-//        black = new player(objectColour.black, blackpiece);
+        // create chess figures and locate them on chess board
+        whitePiece = new Piece(objectColour.white,board[pos1x][pos1y]);
+        blackPiece = new Piece(objectColour.black,board[pos2x][pos2y]);
+        board[pos1x][pos1y].setPiece(whitePiece);
+        board[pos2x][pos2y].setPiece(blackPiece);
     }
 
-
-    // CREATOR
     Core(int fieldsize) {
+
         this.fieldsize = fieldsize;
-        board = new cell[fieldsize][fieldsize];
+        board = new Cell[fieldsize][fieldsize];
         Log.d(TAG, "Board created");
         populateBoard(board,fieldsize);
         turn = objectColour.white;

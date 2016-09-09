@@ -4,7 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 
-
+/** Activity which holds PvP instance */
 public class OneVSOne extends Activity {
 
     @Override
@@ -16,5 +16,4 @@ public class OneVSOne extends Activity {
         ChessView ChessBoard = new ChessView(this, core);
         setContentView(ChessBoard);
     }
-
 }
