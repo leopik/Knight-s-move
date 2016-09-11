@@ -71,4 +71,5 @@ public class MainMenuActivity extends Activity implements View.OnClickListener {
     }
     //TODO: add images
     //TODO: highlight chosen figure?
+    //TODO: javadoc
 }

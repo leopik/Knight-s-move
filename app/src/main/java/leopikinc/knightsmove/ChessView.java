@@ -16,15 +16,16 @@ import leopikinc.knightsmove.Core.*;
  */
 public class ChessView extends View{
 
-    protected Piece black, white, current; // is not current is previous player's
-    protected boolean isSelected, isOver;
+    protected Piece current; // is not current is previous player's
+    protected boolean isSelected; // whether chess figure is selected or not
+    protected boolean isOver; // game over boolean
     protected Core core;
     protected Canvas canvas;
-    protected int sizeoffield;
-    protected int dy;
-    protected int sizeofblock;
+    protected int sizeOfField; // in pixels
+    protected int dy; // offset from top of screen
+    protected int sizeOfBlock; // in pixels
     protected int boardX, boardY;
-    protected static String TAG = "ChessView class";
+    protected static final String TAG = "ChessView class";
 
     public Core getCore() {
         return core;
@@ -32,12 +33,11 @@ public class ChessView extends View{
 
     @Override
     protected void onDraw(Canvas canvas){
+
         this.canvas = canvas;
         drawBoard(core.getBoard());
-        Log.d(TAG, "onDraw called");
         if (isSelected){
             drawAvailableMoves(core.getBoard(), boardX, boardY);
-            Log.d(TAG,"drawAvailableMoves called");
         }
         if (isOver || current.getAvailableMoves().size() == 0) {
             finishGame();
@@ -47,55 +47,58 @@ public class ChessView extends View{
     protected void drawAvailableMoves(Cell[][] board, int x, int y){
 
         Piece piece = board[x][y].getPiece();
-        Paint lightgrey = new Paint();
-        lightgrey.setColor(Color.GRAY);
-        lightgrey.setAlpha(128);
+
+        Paint lightGrey = new Paint();
+        lightGrey.setColor(Color.GRAY);
+        lightGrey.setAlpha(128);
+
         for (int i = 0; i < piece.getAvailableMoves().size(); i++) {
             Cell cell = piece.getAvailableMoves().get(i);
-            canvas.drawCircle(cell.getXCord()*sizeofblock+sizeofblock/2, dy+cell.getYCord()*sizeofblock+sizeofblock/2, 0.5f*sizeofblock/2, lightgrey);
+            canvas.drawCircle(cell.getXCord()* sizeOfBlock + sizeOfBlock /2,
+                    dy+cell.getYCord()* sizeOfBlock + sizeOfBlock /2,
+                    0.5f* sizeOfBlock /2,
+                    lightGrey);
         }
 
     }
 
     protected void drawBoard(Cell[][] board){
 
-        Log.d(TAG, "drawBoard called");
-
+        float figureSize = 0.95f;
         Paint black = new Paint();
         Paint white = new Paint();
-        Paint darkgrey = new Paint();
-        Paint lightgrey = new Paint();
+        Paint darkGrey = new Paint();
+        Paint lightGrey = new Paint();
 
         black.setColor(Color.BLACK);
         white.setColor(Color.WHITE);
-        darkgrey.setColor(Color.DKGRAY);
-        lightgrey.setColor(Color.LTGRAY);
+        darkGrey.setColor(Color.DKGRAY);
+        lightGrey.setColor(Color.LTGRAY);
 
-        // dy - how far top side of field from screen
-        sizeoffield = canvas.getWidth();
-        dy = (canvas.getHeight()-sizeoffield)/2;
-        sizeofblock = sizeoffield/core.getFieldSize();
+        // dy - offset from top
+        sizeOfField = canvas.getWidth();
+        dy = (canvas.getHeight()- sizeOfField)/2;
+        sizeOfBlock = sizeOfField /core.getFieldSize();
 
+        // Draws board itself
         for (int i = 0; i < core.getFieldSize() ; i++) {
             for (int j = 0; j < core.getFieldSize(); j++) {
-                canvas.drawRect(0 + i * sizeofblock
-                        , dy + j * sizeofblock
-                        , sizeofblock + i * sizeofblock
-                        , dy + sizeofblock + j * sizeofblock
-                        , (i + j) % 2 == 1 ? lightgrey : darkgrey);
+                canvas.drawRect(0 + i * sizeOfBlock,
+                        dy + j * sizeOfBlock,
+                        sizeOfBlock + i * sizeOfBlock,
+                        dy + sizeOfBlock + j * sizeOfBlock,
+                        (i + j) % 2 == 1 ? lightGrey : darkGrey);
 
+                // if there is a figure on current cell - draw it too
                 if (board[i][j].getPiece()!=null){
-                    canvas.drawCircle(i*sizeofblock+sizeofblock/2
-                            , dy+j*sizeofblock+sizeofblock/2
-                            , 0.95f*sizeofblock/2
-                            , (board[i][j].getPiece().getPieceColour() == Core.objectColour.black) ? black : white);
-
-                    //TODO: images
+                    canvas.drawCircle(i* sizeOfBlock + sizeOfBlock /2,
+                            dy+j* sizeOfBlock + sizeOfBlock /2,
+                            figureSize* sizeOfBlock /2,
+                            // whether draw black or white figure
+                            (board[i][j].getPiece().getPieceColour() == Core.objectColour.black) ? black : white);
                 }
-
             }
         }
-
     }
 
     protected void finishGame(){
@@ -104,19 +107,20 @@ public class ChessView extends View{
     }
 
     @Override
-    public boolean onTouchEvent(MotionEvent event)
-    {
-        if (event.getAction() != MotionEvent.ACTION_DOWN)
-            return super.onTouchEvent(event);
+    public boolean onTouchEvent(MotionEvent event) {
 
+        if (event.getAction() != MotionEvent.ACTION_DOWN) {
+            return super.onTouchEvent(event);
+        }
+
+        // game has already ended
         if (isOver) {
-            // game has already ended
             finishGame();
             return super.onTouchEvent(event);
         }
 
-        int targetX = (int) (event.getX()*core.getFieldSize()/sizeoffield);
-        int targetY = (int) ((event.getY()-dy)*core.getFieldSize()/sizeoffield);
+        int targetX = (int) (event.getX()*core.getFieldSize()/ sizeOfField); // X cord of cell  which player pressed
+        int targetY = (int) ((event.getY()-dy)*core.getFieldSize()/ sizeOfField); // Y cord of cell which player pressed
 
         // checks bounds
         if (targetX < core.getFieldSize()
@@ -126,19 +130,22 @@ public class ChessView extends View{
 
             // if not selected yet
             if (!isSelected) {
-                if (core.getBoard()[targetX][targetY].getPiece() != null && core.getBoard()[targetX][targetY].getPiece().getPieceColour() == core.getTurn()) {
+                // if cell which player pressed contains figure and current turn belongs to this figure
+                if (core.getBoard()[targetX][targetY].getPiece() != null
+                            && core.getBoard()[targetX][targetY].getPiece().getPieceColour() == core.getTurn()) {
                     isSelected = true;
                     boardX = targetX;
                     boardY = targetY;
                     invalidate();
                     return true;
                 }
+            // else - try to move to position where player pressed
             } else {
                 int success = core
                         .getBoard()[boardX][boardY]
                         .getPiece()
                         .move(core.getBoard()[targetX][targetY]);
-                Log.d(TAG, "Tryed to move");
+
                 switch (success) {
                     case 0:
                         isOver = true;
@@ -156,6 +163,7 @@ public class ChessView extends View{
     }
 
     public ChessView(Context context, Core core){
+
         super(context);
         this.core = core;
         current = core.getWhitePiece();

@@ -9,73 +9,70 @@ import android.view.MotionEvent;
  */
 public class ChessViewComputer extends ChessView {
 
-    protected static String TAG = "ChessViewComputer class";
-    protected Core.objectColour player;
-    protected Core.Piece playerpiece;
-    protected Core.Piece computerpiece;
+    protected static final String TAG = "ChessViewComputer class";
+    protected Core.objectColour playerColour;
+    protected Core.Piece playerPiece;
+    protected Core.Piece computerPiece;
 
     public void setMoveOrder(Core.objectColour color) {
-        player = color;
+
+        playerColour = color;
         if (color == Core.objectColour.black) {
-            playerpiece = core.getBlackPiece();
-            computerpiece = core.getWhitePiece();
+            playerPiece = core.getBlackPiece();
+            computerPiece = core.getWhitePiece();
         } else {
-            playerpiece = core.getWhitePiece();
-            computerpiece = core.getBlackPiece();
+            playerPiece = core.getWhitePiece();
+            computerPiece = core.getBlackPiece();
         }
 
-
-        if (player == Core.objectColour.black) {
+        // if player have chosen to play black, then computer does first move
+        if (playerColour == Core.objectColour.black) {
             move();
             invalidate();
-
         }
     }
 
-    ChessViewComputer(Context context, Core core) {
-        super(context, core);
-    }
-
+    // method for computer's move
     private void move() {
-        Log.d("called move", "whay");
+
+        // check whether game is over or not
         if (isOver || current.getAvailableMoves().size() == 0) {
             finishGame();
             return;
         }
-        // if only one available move - do it
-        if (computerpiece.getAvailableMoves().size() == 1) {
-            int success = computerpiece.move(computerpiece.getAvailableMoves().get(0));
+
+        // if only one move is available  - do it
+        if (computerPiece.getAvailableMoves().size() == 1) {
+            int success = computerPiece.move(computerPiece.getAvailableMoves().get(0));
             switch (success) {
                 case 0:
                     isOver = true;
                     break;
                 case 1:
                     core.changeTurn();
-                    current = computerpiece;
-                    break;
-                case 2:
-                    Log.d("switch1","didnot work");
+                    current = computerPiece;
                     break;
             }
             invalidate();
             return;
-        }
-        else {
-            int xmax = 0;
-            int ymax = 0;
-            for (int i = 0; i < computerpiece.getAvailableMoves().size(); i++) {
-                if (computerpiece.getAvailableMoves().get(i).getPiece() != null) {
-                    int success = computerpiece.move(computerpiece.getAvailableMoves().get(i));
+        // else - find cell which is farthest from the left bottom corner
+        } else {
+            int xMax = 0;
+            int yMax = 0;
+
+            // check all available moves
+            for (int i = 0; i < computerPiece.getAvailableMoves().size(); i++) {
+                // if on one of available moves we find opponents figure - eat it
+                if (computerPiece.getAvailableMoves().get(i).getPiece() != null) {
+                    int success = computerPiece.move(computerPiece.getAvailableMoves().get(i));
+
                     switch (success) {
                         case 0:
                             isOver = true;
                             break;
                         case 1:
                             core.changeTurn();
-                            current = computerpiece;
-                            break;
-                        case 2:
-                            Log.d("switch2","didnot work");
+                            current = computerPiece;
                             break;
                     }
                     invalidate();
@@ -83,30 +80,29 @@ public class ChessViewComputer extends ChessView {
                 }
 
                 // check if move is under attack
-                boolean isunderattack = false;
-                for (int j = 0; j < playerpiece.getAvailableMoves().size(); j++) {
-                    if (playerpiece.getAvailableMoves().get(j) == computerpiece.getAvailableMoves().get(i))
-                        isunderattack = true;
+                boolean isUnderAttack = false;
+                for (int j = 0; j < playerPiece.getAvailableMoves().size(); j++) {
+                    if (playerPiece.getAvailableMoves().get(j) == computerPiece.getAvailableMoves().get(i))
+                        isUnderAttack = true;
                 }
 
-                // if it's not under attack and has big distance
-                if (!isunderattack && ((computerpiece.getAvailableMoves().get(i).getXCord() + Math.abs(computerpiece.getAvailableMoves().get(i).getYCord() - core.getFieldSize() +1)) > xmax + ymax)){
-                    xmax = computerpiece.getAvailableMoves().get(i).getXCord();
-                    ymax = Math.abs(computerpiece.getAvailableMoves().get(i).getYCord() - core.getFieldSize() +1);
+                // if it's not under attack and has biggest distance than save this position
+                if (!isUnderAttack && ((computerPiece.getAvailableMoves().get(i).getXCord() + Math.abs(computerPiece.getAvailableMoves().get(i).getYCord() - core.getFieldSize() +1)) > xMax + yMax)){
+                    xMax = computerPiece.getAvailableMoves().get(i).getXCord();
+                    yMax = Math.abs(computerPiece.getAvailableMoves().get(i).getYCord() - core.getFieldSize() +1);
                 }
             }
 
-            int success = computerpiece.move(core.getBoard()[xmax][Math.abs(ymax - core.getFieldSize() +1)]);
+            // finally move to the best suited position
+            int success = computerPiece.move(core.getBoard()[xMax][Math.abs(yMax - core.getFieldSize() +1)]);
+
             switch (success) {
                 case 0:
                     isOver = true;
                     break;
                 case 1:
                     core.changeTurn();
-                    current = computerpiece;//core.getBoard()[xmax][Math.abs(ymax - core.getFieldSize() +1)].getPiece();
-                    break;
-                case 2:
-                    Log.d("switch3","didnot work");
+                    current = computerPiece;
                     break;
             }
             invalidate();
@@ -114,24 +110,25 @@ public class ChessViewComputer extends ChessView {
         }
     }
 
+    /**
+     * Same as parent's method, but with only change that after player's successful move,
+     * called computer's "move" method
+     */
     @Override
-    public boolean onTouchEvent(MotionEvent event)
-    {
-        if (event.getAction() != MotionEvent.ACTION_DOWN)
-            return super.onTouchEvent(event);
+    public boolean onTouchEvent(MotionEvent event) {
 
-//        if (//current != playerpiece) {
-//
-//            return false;//super.onTouchEvent(event);
-//        }
+        if (event.getAction() != MotionEvent.ACTION_DOWN) {
+            return super.onTouchEvent(event);
+        }
+
         if (isOver) {
             // game has already ended
             finishGame();
             return super.onTouchEvent(event);
         }
 
-        int targetX = (int) (event.getX()*core.getFieldSize()/sizeoffield);
-        int targetY = (int) ((event.getY()-dy)*core.getFieldSize()/sizeoffield);
+        int targetX = (int) (event.getX()*core.getFieldSize()/ sizeOfField); // X cord of cell  which player pressed
+        int targetY = (int) ((event.getY()-dy)*core.getFieldSize()/ sizeOfField); // Y cord of cell  which player pressed
 
         // checks bounds
         if (targetX < core.getFieldSize()
@@ -141,19 +138,22 @@ public class ChessViewComputer extends ChessView {
 
             // if not selected yet
             if (!isSelected) {
-                if (core.getBoard()[targetX][targetY].getPiece() != null && core.getBoard()[targetX][targetY].getPiece().getPieceColour() == core.getTurn()) {
+                // if cell which player pressed contains figure and current turn belongs to this figure
+                if (core.getBoard()[targetX][targetY].getPiece() != null
+                            && core.getBoard()[targetX][targetY].getPiece().getPieceColour() == core.getTurn()) {
                     isSelected = true;
                     boardX = targetX;
                     boardY = targetY;
                     invalidate();
                     return true;
                 }
+            // else - try to move to position where player pressed
             } else {
                 int success = core
                         .getBoard()[boardX][boardY]
                         .getPiece()
                         .move(core.getBoard()[targetX][targetY]);
-                Log.d(TAG, "Tryed to move"+ success);
+
                 switch (success) {
                     case 0:
                         isOver = true;
@@ -162,7 +162,7 @@ public class ChessViewComputer extends ChessView {
                         core.changeTurn();
                         current = core.getBoard()[targetX][targetY].getPiece();
                         invalidate();
-                        move();
+                        move(); // make computer's move
                         break;
                 }
             }
@@ -170,5 +170,9 @@ public class ChessViewComputer extends ChessView {
         isSelected=false;
         invalidate();
         return true;
+    }
+
+    public ChessViewComputer(Context context, Core core) {
+        super(context, core);
     }
 }

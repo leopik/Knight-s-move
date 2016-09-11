@@ -88,8 +88,9 @@ public class Core {
         }
 
         /**
-         * 0 means one knight ate another
-         * 1 means successful move
+         * method which moves chess figure and returns info about success or unsuccess move
+         * @return 0 means one knight ate another,
+         * 1 means successful move,
          * 2 means unsuccessful move
          */
         public byte move(Cell targetMove){
@@ -179,7 +180,6 @@ public class Core {
 
         this.fieldsize = fieldsize;
         board = new Cell[fieldsize][fieldsize];
-        Log.d(TAG, "Board created");
         populateBoard(board,fieldsize);
         turn = objectColour.white;
     }
